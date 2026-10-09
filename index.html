@@ -18,7 +18,7 @@
 
 <!-- SEO -->
 <title>Shivam Opticals — Best Optical Store in Sultanpur</title>
-<meta name="description" content="Trusted optical store in Sultanpur since 1997. Branded eyeglasses, sunglasses, bluecut & photochromic lenses, free computerized eye testing. Two branches." />
+<meta name="description" content="Trusted optical store in Sultanpur for over 30 years. Branded eyeglasses, sunglasses, bluecut & photochromic lenses, free computerized eye testing. Two branches." />
 <meta name="keywords" content="Best Optical Store in Sultanpur, Bluecut Glasses in Sultanpur, Computer Glasses Shop Near Me, Photochromic Lenses Sultanpur, Anti Glare Lenses, Free Eye Testing Sultanpur, Sunglasses Shop Sultanpur, Shivam Opticals" />
 <meta name="author" content="Shivam Opticals" />
 <meta name="robots" content="index, follow" />
@@ -433,8 +433,13 @@
   /* Hero split: slideshow, then product gallery, then headline block */
   section.hero.hero-top { padding-bottom: 0; }
   section.hero.hero-top .hero-visual { margin-bottom: 0; }
-  section.hero.hero-text { padding-top: 64px; }
-  section.gallery-section { padding-top: 56px; }
+  section.hero.hero-text { padding-top: 24px; background: linear-gradient(180deg, #f3f6fc 0%, var(--bg) 100%); }
+  section.gallery-section { padding-top: 56px; padding-bottom: 56px; }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  .hero-ctas { justify-content: center; }
+  .product-img img { filter: brightness(1.03); }
+  .gallery-cta.visit-dirs { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 32px 0 56px; }
   .gallery-see-all { display: none; }
 
   .hero .eyebrow {
@@ -905,10 +910,12 @@
     color: #fff;
   }
   .product-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
   }
+  .product-grid > .product-card { flex: 0 0 calc((100% - 60px) / 4); }
   .product-card {
     display: block;
     text-decoration: none;
@@ -1066,10 +1073,11 @@
     display: grid;
     grid-template-columns: 0.85fr 1.15fr;
     gap: 72px;
-    align-items: center;
+    align-items: start;
   }
   .founder-img-wrap {
-    position: relative;
+    position: sticky;
+    top: 110px;
     border-radius: var(--radius-xl);
     overflow: hidden;
     aspect-ratio: 4 / 5;
@@ -1081,19 +1089,19 @@
   }
   .founder-img-tag {
     position: absolute;
-    bottom: 24px;
-    left: 24px;
-    right: 24px;
+    bottom: 14px;
+    left: 14px;
+    right: 14px;
     background: rgba(10, 10, 10, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: var(--radius);
-    padding: 20px 24px;
+    padding: 12px 16px;
     color: #fff;
   }
   .founder-img-tag strong {
     font-family: 'Fraunces', serif;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 500;
     display: block;
     margin-bottom: 4px;
@@ -1882,6 +1890,8 @@ color: var(--accent-tint);
       gap: 40px;
     }
     .founder-img-wrap {
+      position: relative;
+      top: auto;
       max-width: 420px;
       margin: 0 auto;
     }
@@ -1906,9 +1916,7 @@ color: var(--accent-tint);
       grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 180px;
     }
-    .product-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
+    .product-grid > .product-card { flex: 0 0 calc((100% - 40px) / 3); }
     .footer-grid {
       grid-template-columns: 1fr 1fr;
       gap: 36px;
@@ -1972,14 +1980,12 @@ color: var(--accent-tint);
       grid-auto-rows: 160px;
       gap: 12px;
     }
-    .product-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
+    .product-grid { gap: 12px; }
+    .product-grid > .product-card { flex: 0 0 calc((100% - 12px) / 2); }
     /* Phones: show the first 8 products, rest via "See all" */
     .product-card:nth-child(n+9) { display: none; }
     .gallery-see-all { display: inline-flex; margin-bottom: 14px; }
-    section.hero.hero-text { padding-top: 40px; }
+    section.hero.hero-text { padding-top: 16px; }
     section.gallery-section { padding-top: 36px; }
     .gallery-filters { gap: 8px; }
     .gallery-filter { padding: 8px 18px; font-size: 13px; }
@@ -2024,10 +2030,10 @@ color: var(--accent-tint);
       <li><a href="tel:+919415382565" class="nav-cta">Call Now</a></li>
     </ul>
     <div class="nav-right">
-      <a href="https://wa.me/919569916408?text=Hi%20Shivam%20Opticals%21%20I%27d%20like%20to%20book%20a%20free%20eye%20test.%0AName%3A%20" target="_blank" rel="noopener" class="nav-book-btn" aria-label="Book a free eye test on WhatsApp">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884zm8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-        <span class="nav-book-btn-full">Book Eye Test</span>
-        <span class="nav-book-btn-short">Book</span>
+      <a href="#branches" class="nav-book-btn" aria-label="Free eye test — find your nearest branch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span class="nav-book-btn-full">Free Eye Test</span>
+        <span class="nav-book-btn-short">Eye Test</span>
       </a>
       <button class="nav-toggle" id="navToggle" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -2070,13 +2076,8 @@ color: var(--accent-tint);
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Browse Our Collection</span>
-      <h2>Frames & <span class="italic-accent">sunglasses</span> in store now</h2>
+      <h2>Eyeglass <span class="italic-accent">frames</span> in store now</h2>
       <p>A glimpse of what's on our shelves right now. Visit either branch to try these on, or ask us on WhatsApp.</p>
-    </div>
-
-    <div class="gallery-filters">
-      <button class="gallery-filter active" data-filter="all">All</button>
-      <button class="gallery-filter" data-filter="eyeglasses">Eyeglasses</button>
     </div>
 
     <div class="product-grid">
@@ -2152,14 +2153,14 @@ color: var(--accent-tint);
 <section class="hero hero-text">
   <div class="container">
     <div class="hero-content">
-      <span class="eyebrow">Serving Sultanpur Since 1997</span>
+      <span class="eyebrow">Serving Sultanpur for 30+ Years</span>
       <h1>
         Premium <span class="italic-accent">Eyewear</span>.
         Trusted <span class="italic-accent">Vision Care</span>.
       </h1>
 
       <p class="hero-tagline">
-        For over <strong><span id="years-count-1">28</span> years</strong>, Shivam Opticals has been one of Sultanpur's trusted optical destinations, offering <strong>computerized eye testing</strong>, premium spectacle frames, branded sunglasses, Crizal and other quality lenses, contact lenses, and expert vision care—all under one roof.
+        <strong>Computerized eye testing</strong>, premium spectacle frames, branded sunglasses, Crizal and other quality lenses, contact lenses, and expert vision care—all under one roof.
       </p>
 
       <div class="hero-ctas">
@@ -2175,15 +2176,11 @@ color: var(--accent-tint);
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           Visit Our Stores
         </a>
-        <a href="https://wa.me/c/919569916408" target="_blank" rel="noopener" class="btn btn-catalogue" aria-label="Browse our WhatsApp catalogue">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Browse Catalogue
-        </a>
       </div>
 
       <div class="hero-trust">
         <div class="trust-item">
-          <span class="num"><span id="years-count-2">28</span><span style="color:var(--accent)">+</span></span>
+          <span class="num">30<span style="color:var(--accent)">+</span></span>
           <span class="label">Years of Trust</span>
         </div>
         <div class="trust-item">
@@ -2376,7 +2373,7 @@ color: var(--accent-tint);
 <section class="section visit-section" id="visit-us">
   <div class="container">
     <div class="section-head">
-      <span class="eyebrow">Follow Us</span>
+      <span class="eyebrow">A Look Inside</span>
       <h2>Inside <span class="italic-accent">Shivam Opticals</span></h2>
       <p>Two branches, one team, decades of frame-fitting experience — here's what you'll actually walk into. Follow along on Instagram for new arrivals and everyday moments from our showroom.</p>
     </div>
@@ -2405,10 +2402,14 @@ color: var(--accent-tint);
       </div>
     </div>
 
-    <div class="gallery-cta">
+    <div class="gallery-cta visit-dirs">
       <a href="https://maps.app.goo.gl/xT6182rfBRjfS7uo7" target="_blank" rel="noopener" class="btn btn-catalogue">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Get Directions
+        Directions · Dariyapur
+      </a>
+      <a href="https://maps.app.goo.gl/xKa15XdbpbgidYiZ8?g_st=ac" target="_blank" rel="noopener" class="btn btn-catalogue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Directions · Kasba
       </a>
     </div>
 
@@ -2436,36 +2437,36 @@ color: var(--accent-tint);
     <div class="book-test-card">
       <div class="book-test-content">
         <span class="eyebrow">Free Eye Test</span>
-        <h2>Book your <span class="italic-accent">free eye test</span> slot</h2>
-        <p>To make sure every visitor gets prompt, unhurried attention from our optometrists, we now ask you to reserve your free eye test slot in advance. It only takes a minute — straight on WhatsApp, no forms.</p>
+        <h2>Walk in for a <span class="italic-accent">free eye test</span></h2>
+        <p>No appointment needed. Just visit either branch and our optometrists will take you through a full computerised eye test, free of charge.</p>
 
         <div class="book-steps">
           <div class="book-step">
             <span class="book-step-num">1</span>
             <div>
-              <h3>Tap the button below</h3>
-              <p>Opens WhatsApp with a ready message</p>
+              <h3>Visit either branch</h3>
+              <p>Dariyapur Tiraha or Kasba, near Astha Hospital</p>
             </div>
           </div>
           <div class="book-step">
             <span class="book-step-num">2</span>
             <div>
-              <h3>Just add your name</h3>
-              <p>Takes two seconds, nothing else to fill</p>
+              <h3>Get your eyes tested</h3>
+              <p>A full computerised eye test by our optometrists</p>
             </div>
           </div>
           <div class="book-step">
             <span class="book-step-num">3</span>
             <div>
-              <h3>Hit send</h3>
-              <p>We'll ask your branch & preferred time on chat and confirm your slot</p>
+              <h3>Understand your prescription</h3>
+              <p>We explain it and recommend lenses for your lifestyle — no obligation to buy</p>
             </div>
           </div>
         </div>
 
-        <a href="https://wa.me/919569916408?text=Hi%20Shivam%20Opticals%21%20I%27d%20like%20to%20book%20a%20free%20eye%20test.%0AName%3A%20" target="_blank" rel="noopener" class="btn btn-book" aria-label="Book your free eye test slot on WhatsApp">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884zm8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-          Book Your Free Eye Test on WhatsApp
+        <a href="#branches" class="btn btn-book" aria-label="Find your nearest Shivam Opticals branch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Find Your Nearest Branch
         </a>
       </div>
     </div>
@@ -2536,8 +2537,8 @@ color: var(--accent-tint);
 
       <div class="about-content">
         <span class="eyebrow">About Shivam Opticals</span>
-        <h2><span id="years-count-3">28</span> years of <span class="italic-accent">trusted vision care</span> in Sultanpur</h2>
-        <p>For over <strong><span id="years-count-4">28</span> years</strong>, Shivam Opticals has been one of Sultanpur's most trusted destinations for quality eyewear and professional vision care. Since 1997, we've helped thousands of customers find the right spectacles, sunglasses, contact lenses, and premium optical solutions through expert guidance, genuine products, and personalized service.</p>
+        <h2>30+ years of <span class="italic-accent">trusted vision care</span> in Sultanpur</h2>
+        <p>For over <strong>30 years</strong>, Shivam Opticals has been one of Sultanpur's most trusted destinations for quality eyewear and professional vision care. For decades, we've helped thousands of customers find the right spectacles, sunglasses, contact lenses, and premium optical solutions through expert guidance, genuine products, and personalized service.</p>
         <p>Whether you're looking for bluecut lenses for digital comfort, photochromic lenses for outdoor convenience, anti-glare coatings, branded frames, or prescription sunglasses, our experienced team helps you choose eyewear that matches your vision, lifestyle, and personal style. Every recommendation is made with your comfort and long-term eye health in mind.</p>
 
         <div class="about-features">
@@ -2600,7 +2601,6 @@ color: var(--accent-tint);
       <div class="founder-content">
         <span class="eyebrow">Our Founder</span>
         <h2>The story behind <span class="italic-accent">Shivam Opticals</span></h2>
-        <span class="founder-name">Arvind Dwivedi</span>
 
         <p style="font-family:'Fraunces',serif; font-style:italic; font-size:1.15rem; color:var(--primary); margin-bottom:24px;">Some businesses begin with investment.<br>Shivam Opticals began with determination.</p>
 
@@ -2914,7 +2914,7 @@ color: var(--accent-tint);
           Message Shivam Opticals on WhatsApp
         </a>
         <a href="https://wa.me/c/919569916408" target="_blank" rel="noopener" class="btn btn-catalogue contact-whatsapp" style="margin-top:12px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
           Browse Our Full Catalogue
         </a>
       </div>
@@ -2947,7 +2947,7 @@ class="brand-logo">
 class="brand-name">
 
 </div>
-        <p>Serving Sultanpur since 1997, Shivam Opticals has earned the trust of thousands of families through quality eyewear, expert eye testing, genuine products, and honest pricing. Visit either of our two branches for premium vision care at affordable prices.</p>
+        <p>Serving Sultanpur for over 30 years, Shivam Opticals has earned the trust of thousands of families through quality eyewear, expert eye testing, genuine products, and honest pricing. Visit either of our two branches for premium vision care at affordable prices.</p>
         <div class="footer-socials">
           <a href="https://www.facebook.com/share/14bh6ByCsjP/" target="_blank" rel="noopener" aria-label="Facebook">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -2969,7 +2969,7 @@ class="brand-name">
           <li><a href="#visit-us">Visit Us</a></li>
           <li><a href="#about">About Us</a></li>
           <li><a href="#founder">Founder</a></li>
-          <li><a href="#book-test">Book Eye Test</a></li>
+          <li><a href="#book-test">Free Eye Test</a></li>
           <li><a href="#visit-us">Instagram</a></li>
           <li><a href="#branches">Branches</a></li>
           <li><a href="#faq">FAQ</a></li>
@@ -3009,13 +3009,8 @@ class="brand-name">
       </div>
     </div>
 
-    <div class="seo-keywords">
-      <strong style="color: rgba(255,255,255,0.5);">Search popular:</strong>
-      Best Optical Store in Sultanpur · Bluecut Glasses in Sultanpur · Computer Glasses Shop Near Me · Photochromic Lenses Sultanpur · Anti Glare Lenses · Sunglasses Shop Sultanpur · Free Eye Testing · Shivam Opticals Dariyapur · Shivam Opticals Kasba
-    </div>
-
     <div class="footer-bottom">
-  <div>© Shivam Opticals • Since 1997 • All Rights Reserved.</div>
+  <div>© Shivam Opticals • 30+ Years in Sultanpur • All Rights Reserved.</div>
   <div>Designed with ❤️ in Sultanpur, Uttar Pradesh</div>
 </div>
   </div>
@@ -3044,13 +3039,6 @@ class="brand-name">
       poster.classList.add('is-hidden');
       video.play();
     });
-  })();
-
-  // Auto-updating "years in business" (Since 1997) — keeps every mention in sync, no manual edits needed
-  (function() {
-    const yearsInBusiness = new Date().getFullYear() - 1997;
-    document.querySelectorAll('#years-count-1, #years-count-2, #years-count-3, #years-count-4')
-      .forEach(el => { el.textContent = yearsInBusiness; });
   })();
 
   // Hero slideshow — crossfades through the product banners every 5s.
