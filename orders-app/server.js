@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const sharp = require('sharp');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const DATA_DIR = path.join(__dirname, 'data');
@@ -9,6 +10,89 @@ const ORDERS_PATH = path.join(DATA_DIR, 'orders.json');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(ORDERS_PATH)) fs.writeFileSync(ORDERS_PATH, '[]');
+
+const SLIP_LOGO_PATH = path.join(__dirname, 'public', 'images', 'logo.jpg');
+const SLIP_WIDTH = 600;
+const SLIP_HEADER_HEIGHT = 160;
+const SLIP_HEIGHT = 620;
+
+function escapeXml(str) {
+  return String(str || '').replace(/[<>&'"]/g, (c) => ({
+    '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;',
+  }[c]));
+}
+
+// Builds the slip body (everything except the logo, which is composited on afterwards)
+// as an SVG, so it renders crisply at any size without needing a headless browser.
+function buildSlipSvg(order) {
+  const rx = order.prescription || {};
+  const dateStr = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const rows = [
+    ['Right', rx.r_sph, rx.r_cyl, rx.r_axis],
+    ['Left', rx.l_sph, rx.l_cyl, rx.l_axis],
+  ];
+  let rowsSvg = '';
+  rows.forEach((r, i) => {
+    const y = 355 + i * 40;
+    rowsSvg += `
+      <text x="60" y="${y}" font-size="20" font-weight="700" fill="#1d5fae">${escapeXml(r[0])}</text>
+      <text x="260" y="${y}" font-size="20" text-anchor="middle" fill="#1c2530">${escapeXml(r[1] || '-')}</text>
+      <text x="390" y="${y}" font-size="20" text-anchor="middle" fill="#1c2530">${escapeXml(r[2] || '-')}</text>
+      <text x="520" y="${y}" font-size="20" text-anchor="middle" fill="#1c2530">${escapeXml(r[3] || '-')}</text>`;
+  });
+
+  return `
+<svg width="${SLIP_WIDTH}" height="${SLIP_HEIGHT}" viewBox="0 0 ${SLIP_WIDTH} ${SLIP_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${SLIP_WIDTH}" height="${SLIP_HEIGHT}" fill="#ffffff"/>
+  <rect x="0" y="0" width="${SLIP_WIDTH}" height="${SLIP_HEADER_HEIGHT}" fill="#0a0a0a"/>
+  <text x="${SLIP_WIDTH / 2}" y="${SLIP_HEADER_HEIGHT + 30}" font-size="18" fill="#667" text-anchor="middle" font-family="Arial, sans-serif">${escapeXml(order.branch)} Branch</text>
+
+  <text x="60" y="${SLIP_HEADER_HEIGHT + 70}" font-size="18" fill="#667" font-family="Arial, sans-serif">Customer</text>
+  <text x="540" y="${SLIP_HEADER_HEIGHT + 70}" font-size="18" font-weight="700" text-anchor="end" fill="#1c2530" font-family="Arial, sans-serif">${escapeXml(order.customerName)}</text>
+
+  <text x="60" y="${SLIP_HEADER_HEIGHT + 105}" font-size="18" fill="#667" font-family="Arial, sans-serif">Order Date</text>
+  <text x="540" y="${SLIP_HEADER_HEIGHT + 105}" font-size="18" font-weight="700" text-anchor="end" fill="#1c2530" font-family="Arial, sans-serif">${escapeXml(dateStr)}</text>
+
+  <line x1="60" y1="${SLIP_HEADER_HEIGHT + 125}" x2="540" y2="${SLIP_HEADER_HEIGHT + 125}" stroke="#dfe3e8" stroke-width="2" stroke-dasharray="6,6"/>
+
+  <text x="60" y="${SLIP_HEADER_HEIGHT + 160}" font-size="15" font-weight="700" fill="#667" font-family="Arial, sans-serif">EYE</text>
+  <text x="260" y="${SLIP_HEADER_HEIGHT + 160}" font-size="15" font-weight="700" text-anchor="middle" fill="#667" font-family="Arial, sans-serif">SPH</text>
+  <text x="390" y="${SLIP_HEADER_HEIGHT + 160}" font-size="15" font-weight="700" text-anchor="middle" fill="#667" font-family="Arial, sans-serif">CYL</text>
+  <text x="520" y="${SLIP_HEADER_HEIGHT + 160}" font-size="15" font-weight="700" text-anchor="middle" fill="#667" font-family="Arial, sans-serif">AXIS</text>
+  <line x1="60" y1="${SLIP_HEADER_HEIGHT + 175}" x2="540" y2="${SLIP_HEADER_HEIGHT + 175}" stroke="#dfe3e8" stroke-width="1"/>
+
+  <g font-family="Arial, sans-serif">${rowsSvg}</g>
+
+  <line x1="60" y1="435" x2="540" y2="435" stroke="#dfe3e8" stroke-width="1"/>
+
+  <text x="60" y="470" font-size="18" fill="#667" font-family="Arial, sans-serif">ADD</text>
+  <text x="540" y="470" font-size="18" font-weight="700" text-anchor="end" fill="#1c2530" font-family="Arial, sans-serif">${escapeXml(rx.add || '-')}</text>
+
+  <text x="60" y="505" font-size="18" fill="#667" font-family="Arial, sans-serif">PD</text>
+  <text x="540" y="505" font-size="18" font-weight="700" text-anchor="end" fill="#1c2530" font-family="Arial, sans-serif">${escapeXml(rx.pd || '-')}</text>
+
+  <text x="${SLIP_WIDTH / 2}" y="580" font-size="14" fill="#889" text-anchor="middle" font-family="Arial, sans-serif">Dariyapur &amp; Kasba, Sultanpur · Keep this slip for your records</text>
+</svg>`;
+}
+
+// Renders the full slip: the SVG body, with the real shop signboard logo composited
+// into the black header band on top.
+async function renderSlipPng(order) {
+  const svg = buildSlipSvg(order);
+  let img = sharp(Buffer.from(svg));
+
+  if (fs.existsSync(SLIP_LOGO_PATH)) {
+    const logoBuffer = await sharp(SLIP_LOGO_PATH).resize({ width: 440 }).toBuffer();
+    const logoMeta = await sharp(logoBuffer).metadata();
+    const logoWidth = logoMeta.width || 440;
+    const logoHeight = logoMeta.height || 120;
+    const top = Math.max(Math.round((SLIP_HEADER_HEIGHT - logoHeight) / 2), 8);
+    const left = Math.round((SLIP_WIDTH - logoWidth) / 2);
+    img = img.composite([{ input: logoBuffer, top, left }]);
+  }
+
+  return img.png().toBuffer();
+}
 
 function loadConfig() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
@@ -29,10 +113,22 @@ function normalizePhone(raw) {
   return digits;
 }
 
-async function sendTemplate(toRaw, templateName, bodyParams) {
+async function sendTemplate(toRaw, templateName, bodyParams, headerImageUrl) {
   const config = loadConfig();
   const to = normalizePhone(toRaw);
   const url = `https://graph.facebook.com/v21.0/${config.phoneNumberId}/messages`;
+  const components = [
+    {
+      type: 'body',
+      parameters: bodyParams.map((text) => ({ type: 'text', text: String(text) })),
+    },
+  ];
+  if (headerImageUrl) {
+    components.unshift({
+      type: 'header',
+      parameters: [{ type: 'image', image: { link: headerImageUrl } }],
+    });
+  }
   const payload = {
     messaging_product: 'whatsapp',
     to,
@@ -40,12 +136,7 @@ async function sendTemplate(toRaw, templateName, bodyParams) {
     template: {
       name: templateName,
       language: { code: config.templateLanguage || 'en_US' },
-      components: [
-        {
-          type: 'body',
-          parameters: bodyParams.map((text) => ({ type: 'text', text: String(text) })),
-        },
-      ],
+      components,
     },
   };
 
@@ -224,9 +315,33 @@ app.post('/api/orders', checkPin, async (req, res) => {
   orders.push(order);
   saveOrders(orders);
 
-  const sendResult = await sendTemplate(phone, 'order_placed', [customerName, branch]);
+  // Once Meta approves the image-header version of order_placed, flip
+  // slipImageEnabled to true in config.json -- until then this stays off so the
+  // currently-live (text-only) template keeps working without interruption.
+  let headerImageUrl;
+  if (config.slipImageEnabled && config.publicBaseUrl) {
+    headerImageUrl = `${config.publicBaseUrl}/api/orders/${order.id}/slip.png`;
+  }
+  const sendResult = await sendTemplate(phone, 'order_placed', [customerName, branch], headerImageUrl);
   logToSheet(order);
   res.json({ order, whatsapp: sendResult });
+});
+
+// Customer-facing: fetch the generated prescription slip as an image, used both as
+// the WhatsApp template's header image and (optionally) viewable directly.
+app.get('/api/orders/:id/slip.png', async (req, res) => {
+  const orders = loadOrders();
+  const order = orders.find((o) => o.id === req.params.id);
+  if (!order) return res.status(404).send('Not found');
+  try {
+    const png = await renderSlipPng(order);
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(png);
+  } catch (err) {
+    console.error('Slip image generation failed:', err);
+    res.status(500).send('Error generating slip image');
+  }
 });
 
 // Mark an order as ready -> sends order_ready template
