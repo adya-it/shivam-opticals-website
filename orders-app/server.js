@@ -165,7 +165,9 @@ app.post('/api/orders/:id/collected', checkPin, async (req, res) => {
 });
 
 // Customer-facing lookup: find the most recent order for a phone number (across all branches)
+// Allows cross-origin requests from the main website, since the prescription page lives there.
 app.get('/api/prescription', (req, res) => {
+  res.set('Access-Control-Allow-Origin', 'https://shivamopticals.co.in');
   const rawPhone = req.query.phone;
   if (!rawPhone) return res.status(400).json({ error: 'phone is required' });
   const target = normalizePhone(rawPhone);

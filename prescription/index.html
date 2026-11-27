@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Prescription - Shivam Opticals</title>
+<meta name="description" content="Look up and download your eyewear prescription from Shivam Opticals." />
+<style>
+  :root {
+    --blue: #1d5fae;
+    --green: #1f8a52;
+    --amber: #b8780a;
+    --gray-bg: #f4f6f8;
+    --card-bg: #ffffff;
+    --border: #dfe3e8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--gray-bg);
+    color: #1c2530;
+  }
+  header {
+    background: var(--blue);
+    color: white;
+    padding: 22px 16px;
+    text-align: center;
+  }
+  header img {
+    max-height: 60px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: white;
+    padding: 4px;
+  }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  main { max-width: 480px; margin: 0 auto; padding: 18px 14px 40px; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  label { display: block; font-size: 13px; color: #556; margin: 0 0 6px; font-weight: 600; }
+  input[type=tel] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    padding: 12px 14px;
+    font-weight: 600;
+    background: var(--blue);
+    color: white;
+    width: 100%;
+    margin-top: 12px;
+  }
+  button.secondary { background: var(--green); }
+  button:disabled { opacity: 0.6; }
+  .status { font-size: 14px; color: #556; text-align: center; padding: 10px 0; }
+  .status.error { color: #c0392b; }
+  .slip {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .slip-header {
+    text-align: center;
+    border-bottom: 2px dashed var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  .slip-shop { font-weight: 700; font-size: 18px; color: var(--blue); }
+  .slip-branch { font-size: 13px; color: #667; margin-top: 2px; }
+  .slip-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 5px 0;
+  }
+  .slip-row span:first-child { color: #667; }
+  .slip-row span:last-child { font-weight: 600; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+  .badge.placed { background: #fde8c8; color: #8a5b00; }
+  .badge.ready { background: #fff0cf; color: var(--amber); }
+  .badge.collected { background: #d9f2e3; color: var(--green); }
+  .rx-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  .rx-table th, .rx-table td {
+    text-align: center;
+    padding: 7px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rx-table th { color: #667; font-weight: 600; font-size: 12px; }
+  .rx-table td:first-child, .rx-table th:first-child { text-align: left; font-weight: 600; color: var(--blue); }
+  .footer-note { text-align: center; font-size: 12px; color: #889; margin-top: 18px; }
+
+  @media print {
+    header, .lookup-card, .footer-note, .no-print { display: none !important; }
+    body { background: white; }
+    main { max-width: 100%; padding: 0; }
+    .slip { border: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="../logo.png" alt="Shivam Opticals" />
+  <h1>My Prescription</h1>
+</header>
+
+<main>
+  <div class="card lookup-card">
+    <form id="lookupForm">
+      <label for="phone">Enter your contact number</label>
+      <input type="tel" id="phone" placeholder="98765 43210" required />
+      <button type="submit">Find My Prescription</button>
+    </form>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="footer-note">Shivam Opticals &middot; Dariyapur &amp; Kasba, Sultanpur</div>
+</main>
+
+<script>
+const API_BASE = 'https://shivamopticals.duckdns.org/orders/';
+const form = document.getElementById('lookupForm');
+const resultEl = document.getElementById('result');
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-IN', { dateStyle: 'medium' });
+}
+function rxRow(label, sph, cyl, axis) {
+  return `<tr><td>${label}</td><td>${sph || '-'}</td><td>${cyl || '-'}</td><td>${axis || '-'}</td></tr>`;
+}
+function statusLabel(status) {
+  if (status === 'placed') return 'Being Prepared';
+  if (status === 'ready') return 'Ready for Pickup';
+  if (status === 'collected') return 'Collected';
+  return status;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const phone = document.getElementById('phone').value.trim();
+  const btn = form.querySelector('button');
+  btn.disabled = true;
+  btn.textContent = 'Searching...';
+  resultEl.innerHTML = '<p class="status">Searching...</p>';
+
+  try {
+    const res = await fetch(`${API_BASE}api/prescription?phone=${encodeURIComponent(phone)}`);
+    if (res.status === 404) {
+      resultEl.innerHTML = '<p class="status error">No prescription found for this number. Please check the number, or contact the shop directly.</p>';
+    } else if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      resultEl.innerHTML = `<p class="status error">${data.error || 'Something went wrong. Please try again.'}</p>`;
+    } else {
+      const order = await res.json();
+      const rx = order.prescription || {};
+      resultEl.innerHTML = `
+        <div class="slip">
+          <div class="slip-header">
+            <div class="slip-shop">Shivam Opticals</div>
+            <div class="slip-branch">${order.branch} Branch</div>
+          </div>
+          <div class="slip-row"><span>Customer</span><span>${order.customerName}</span></div>
+          <div class="slip-row"><span>Order Date</span><span>${fmtDate(order.createdAt)}</span></div>
+          <div class="slip-row"><span>Status</span><span class="badge ${order.status}">${statusLabel(order.status)}</span></div>
+          <table class="rx-table">
+            <tr><th></th><th>SPH</th><th>CYL</th><th>AXIS</th></tr>
+            ${rxRow('Right', rx.r_sph, rx.r_cyl, rx.r_axis)}
+            ${rxRow('Left', rx.l_sph, rx.l_cyl, rx.l_axis)}
+          </table>
+          <div class="slip-row"><span>ADD</span><span>${rx.add || '-'}</span></div>
+          <div class="slip-row"><span>PD</span><span>${rx.pd || '-'}</span></div>
+        </div>
+        <button class="secondary no-print" id="downloadBtn" type="button">Download / Print Slip</button>
+      `;
+      document.getElementById('downloadBtn').addEventListener('click', () => window.print());
+    }
+  } catch (err) {
+    resultEl.innerHTML = '<p class="status error">Something went wrong. Please try again.</p>';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Find My Prescription';
+});
+</script>
+</body>
+</html>
