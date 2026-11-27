@@ -33,7 +33,7 @@ function rxSummary(rx) {
 }
 
 async function loadBranches() {
-  const res = await fetch('/api/config');
+  const res = await fetch('api/config');
   const data = await res.json();
   branchSelect.innerHTML = '';
   data.branches.forEach((b) => {
@@ -93,7 +93,7 @@ function orderCardHtml(order) {
 }
 
 async function loadOrders() {
-  const res = await fetch(`/api/orders?branch=${encodeURIComponent(currentBranch)}`);
+  const res = await fetch(`api/orders?branch=${encodeURIComponent(currentBranch)}`);
   const orders = await res.json();
 
   const pending = orders.filter((o) => o.status === 'placed');
@@ -116,7 +116,7 @@ document.addEventListener('click', async (e) => {
 
   if (action === 'delete') {
     if (!confirm('Delete this order? This cannot be undone.')) return;
-    await fetch(`/api/orders/${id}`, { method: 'DELETE' });
+    await fetch(`api/orders/${id}`, { method: 'DELETE' });
     showToast('Order deleted.');
     loadOrders();
     return;
@@ -124,7 +124,7 @@ document.addEventListener('click', async (e) => {
 
   btn.disabled = true;
   btn.textContent = 'Sending...';
-  const res = await fetch(`/api/orders/${id}/${action}`, { method: 'POST' });
+  const res = await fetch(`api/orders/${id}/${action}`, { method: 'POST' });
   const data = await res.json();
   if (data.whatsapp && data.whatsapp.ok) {
     showToast('Status updated & WhatsApp sent!');
@@ -156,7 +156,7 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Placing order...';
 
-  const res = await fetch('/api/orders', {
+  const res = await fetch('api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
