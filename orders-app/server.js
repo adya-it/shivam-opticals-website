@@ -70,6 +70,102 @@ async function sendTemplate(toRaw, templateName, bodyParams) {
   }
 }
 
+const GOOGLE_CREDS_PATH = path.join(__dirname, 'google-credentials.json');
+let cachedGoogleToken = null; // { token, expiresAt }
+
+function base64url(input) {
+  return Buffer.from(input).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+// Exchanges the service-account key for a short-lived Google API access token.
+async function getGoogleAccessToken() {
+  if (cachedGoogleToken && cachedGoogleToken.expiresAt > Date.now() + 60000) {
+    return cachedGoogleToken.token;
+  }
+  if (!fs.existsSync(GOOGLE_CREDS_PATH)) return null;
+  const creds = JSON.parse(fs.readFileSync(GOOGLE_CREDS_PATH, 'utf8'));
+
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const now = Math.floor(Date.now() / 1000);
+  const claim = {
+    iss: creds.client_email,
+    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+  const unsigned = `${base64url(JSON.stringify(header))}.${base64url(JSON.stringify(claim))}`;
+  const signer = crypto.createSign('RSA-SHA256');
+  signer.update(unsigned);
+  signer.end();
+  const signature = signer.sign(creds.private_key).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const jwt = `${unsigned}.${signature}`;
+
+  try {
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion: jwt,
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      console.error('Google auth failed:', JSON.stringify(json));
+      return null;
+    }
+    cachedGoogleToken = { token: json.access_token, expiresAt: Date.now() + json.expires_in * 1000 };
+    return json.access_token;
+  } catch (err) {
+    console.error('Google auth error:', err);
+    return null;
+  }
+}
+
+// Appends one row to the Google Sheet order log. Never throws -- a Sheets outage
+// should never block an order from being placed or a WhatsApp message from sending.
+async function logToSheet(order, statusLabel) {
+  try {
+    const config = loadConfig();
+    const sheetId = config.googleSheetId;
+    if (!sheetId) return;
+    const token = await getGoogleAccessToken();
+    if (!token) return;
+
+    const rx = order.prescription || {};
+    const row = [
+      order.id,
+      order.branch,
+      order.customerName,
+      order.phone,
+      rx.r_sph || '',
+      rx.r_cyl || '',
+      rx.r_axis || '',
+      rx.l_sph || '',
+      rx.l_cyl || '',
+      rx.l_axis || '',
+      rx.add || '',
+      rx.pd || '',
+      statusLabel,
+      new Date().toISOString(),
+    ];
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1!A1:append?valueInputOption=USER_ENTERED`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ values: [row] }),
+    });
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      console.error('Sheet append failed:', JSON.stringify(errJson));
+    }
+  } catch (err) {
+    console.error('Sheet append error:', err);
+  }
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -130,6 +226,7 @@ app.post('/api/orders', checkPin, async (req, res) => {
   saveOrders(orders);
 
   const sendResult = await sendTemplate(phone, 'order_placed', [customerName, branch]);
+  logToSheet(order, 'Placed');
   res.json({ order, whatsapp: sendResult });
 });
 
@@ -144,6 +241,7 @@ app.post('/api/orders/:id/ready', checkPin, async (req, res) => {
   saveOrders(orders);
 
   const sendResult = await sendTemplate(order.phone, 'order_ready', [order.customerName, order.branch]);
+  logToSheet(order, 'Ready');
   res.json({ order, whatsapp: sendResult });
 });
 
@@ -161,6 +259,7 @@ app.post('/api/orders/:id/collected', checkPin, async (req, res) => {
   saveOrders(orders);
 
   const sendResult = await sendTemplate(order.phone, 'order_thankyou', [reviewLink]);
+  logToSheet(order, 'Collected');
   res.json({ order, whatsapp: sendResult });
 });
 
