@@ -125,7 +125,7 @@ async function getGoogleAccessToken() {
 
 // Appends one row to the Google Sheet order log. Never throws -- a Sheets outage
 // should never block an order from being placed or a WhatsApp message from sending.
-async function logToSheet(order, statusLabel) {
+async function logToSheet(order) {
   try {
     const config = loadConfig();
     const sheetId = config.googleSheetId;
@@ -147,7 +147,6 @@ async function logToSheet(order, statusLabel) {
       rx.l_axis || '',
       rx.add || '',
       rx.pd || '',
-      statusLabel,
       new Date().toISOString(),
     ];
 
@@ -226,7 +225,7 @@ app.post('/api/orders', checkPin, async (req, res) => {
   saveOrders(orders);
 
   const sendResult = await sendTemplate(phone, 'order_placed', [customerName, branch]);
-  logToSheet(order, 'Placed');
+  logToSheet(order);
   res.json({ order, whatsapp: sendResult });
 });
 
@@ -241,7 +240,6 @@ app.post('/api/orders/:id/ready', checkPin, async (req, res) => {
   saveOrders(orders);
 
   const sendResult = await sendTemplate(order.phone, 'order_ready', [order.customerName, order.branch]);
-  logToSheet(order, 'Ready');
   res.json({ order, whatsapp: sendResult });
 });
 
@@ -259,7 +257,6 @@ app.post('/api/orders/:id/collected', checkPin, async (req, res) => {
   saveOrders(orders);
 
   const sendResult = await sendTemplate(order.phone, 'order_thankyou', [reviewLink]);
-  logToSheet(order, 'Collected');
   res.json({ order, whatsapp: sendResult });
 });
 
