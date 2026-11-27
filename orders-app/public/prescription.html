@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shivam Opticals - My Prescription</title>
+<style>
+  :root {
+    --blue: #1d5fae;
+    --green: #1f8a52;
+    --amber: #b8780a;
+    --gray-bg: #f4f6f8;
+    --card-bg: #ffffff;
+    --border: #dfe3e8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--gray-bg);
+    color: #1c2530;
+  }
+  header {
+    background: var(--blue);
+    color: white;
+    padding: 20px 16px;
+    text-align: center;
+  }
+  header img {
+    max-height: 64px;
+    margin-bottom: 8px;
+  }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  main { max-width: 480px; margin: 0 auto; padding: 18px 14px 40px; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  label { display: block; font-size: 13px; color: #556; margin: 0 0 6px; font-weight: 600; }
+  input[type=tel] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    padding: 12px 14px;
+    font-weight: 600;
+    background: var(--blue);
+    color: white;
+    width: 100%;
+    margin-top: 12px;
+  }
+  button:disabled { opacity: 0.6; }
+  .status { font-size: 14px; color: #556; text-align: center; padding: 10px 0; }
+  .status.error { color: #c0392b; }
+  .slip {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .slip-header {
+    text-align: center;
+    border-bottom: 2px dashed var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  .slip-shop { font-weight: 700; font-size: 18px; color: var(--blue); }
+  .slip-branch { font-size: 13px; color: #667; margin-top: 2px; }
+  .slip-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 5px 0;
+  }
+  .slip-row span:first-child { color: #667; }
+  .slip-row span:last-child { font-weight: 600; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+  .badge.placed { background: #fde8c8; color: #8a5b00; }
+  .badge.ready { background: #fff0cf; color: var(--amber); }
+  .badge.collected { background: #d9f2e3; color: var(--green); }
+  .rx-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  .rx-table th, .rx-table td {
+    text-align: center;
+    padding: 7px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rx-table th { color: #667; font-weight: 600; font-size: 12px; }
+  .rx-table td:first-child, .rx-table th:first-child { text-align: left; font-weight: 600; color: var(--blue); }
+  .footer-note { text-align: center; font-size: 12px; color: #889; margin-top: 18px; }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="images/logo.png" alt="Shivam Opticals" onerror="this.style.display='none'" />
+  <h1>👓 My Prescription</h1>
+</header>
+
+<main>
+  <div class="card">
+    <form id="lookupForm">
+      <label for="phone">Enter your WhatsApp / contact number</label>
+      <input type="tel" id="phone" placeholder="98765 43210" required />
+      <button type="submit">Find My Prescription</button>
+    </form>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="footer-note">Shivam Opticals &middot; Dariyapur &amp; Kasba, Sultanpur</div>
+</main>
+
+<script src="prescription.js"></script>
+</body>
+</html>

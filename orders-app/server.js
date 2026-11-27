@@ -151,6 +151,22 @@ app.post('/api/orders/:id/collected', async (req, res) => {
   res.json({ order, whatsapp: sendResult });
 });
 
+// Customer-facing lookup: find the most recent order for a phone number (across all branches)
+app.get('/api/prescription', (req, res) => {
+  const rawPhone = req.query.phone;
+  if (!rawPhone) return res.status(400).json({ error: 'phone is required' });
+  const target = normalizePhone(rawPhone);
+  if (target.length < 12) return res.status(400).json({ error: 'Please enter a valid 10-digit number' });
+
+  const orders = loadOrders();
+  const matches = orders.filter((o) => normalizePhone(o.phone) === target);
+  if (!matches.length) {
+    return res.status(404).json({ error: 'No order found for this number' });
+  }
+  matches.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json(matches[0]);
+});
+
 // Delete an order (for fixing mistaken entries)
 app.delete('/api/orders/:id', (req, res) => {
   let orders = loadOrders();
