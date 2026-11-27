@@ -31,11 +31,17 @@
     justify-content: space-between;
   }
   header h1 { font-size: 18px; margin: 0; }
+  .branch-picker { display: flex; align-items: center; gap: 8px; }
+  .branch-picker label { color: white; font-size: 14px; font-weight: 600; margin: 0; }
   select#branchSelect {
-    font-size: 15px;
-    padding: 8px 10px;
+    font-size: 17px;
+    font-weight: 700;
+    padding: 10px 14px;
     border-radius: 6px;
-    border: none;
+    border: 2px solid white;
+    background: white;
+    color: #1c2530;
+    min-width: 170px;
   }
   main { max-width: 720px; margin: 0 auto; padding: 14px; }
   .card {
@@ -105,7 +111,10 @@
 
 <header>
   <h1>👓 Shivam Opticals - Orders</h1>
-  <select id="branchSelect"></select>
+  <div class="branch-picker">
+    <label for="branchSelect">Branch:</label>
+    <select id="branchSelect"></select>
+  </div>
 </header>
 
 <main>
