@@ -3,6 +3,18 @@ let currentBranch = localStorage.getItem('branch') || '';
 const branchSelect = document.getElementById('branchSelect');
 const newOrderCard = document.getElementById('newOrderCard');
 const toastEl = document.getElementById('toast');
+const pinGate = document.getElementById('pinGate');
+const appContent = document.getElementById('appContent');
+const pinInput = document.getElementById('pinInput');
+const pinSubmit = document.getElementById('pinSubmit');
+const pinError = document.getElementById('pinError');
+
+function getPin() {
+  return localStorage.getItem('staffPin') || '';
+}
+function authHeaders() {
+  return { 'x-pin': getPin() };
+}
 
 function showToast(msg) {
   toastEl.textContent = msg;
@@ -93,7 +105,7 @@ function orderCardHtml(order) {
 }
 
 async function loadOrders() {
-  const res = await fetch(`api/orders?branch=${encodeURIComponent(currentBranch)}`);
+  const res = await fetch(`api/orders?branch=${encodeURIComponent(currentBranch)}`, { headers: authHeaders() });
   const orders = await res.json();
 
   const pending = orders.filter((o) => o.status === 'placed');
@@ -116,7 +128,7 @@ document.addEventListener('click', async (e) => {
 
   if (action === 'delete') {
     if (!confirm('Delete this order? This cannot be undone.')) return;
-    await fetch(`api/orders/${id}`, { method: 'DELETE' });
+    await fetch(`api/orders/${id}`, { method: 'DELETE', headers: authHeaders() });
     showToast('Order deleted.');
     loadOrders();
     return;
@@ -124,7 +136,7 @@ document.addEventListener('click', async (e) => {
 
   btn.disabled = true;
   btn.textContent = 'Sending...';
-  const res = await fetch(`api/orders/${id}/${action}`, { method: 'POST' });
+  const res = await fetch(`api/orders/${id}/${action}`, { method: 'POST', headers: authHeaders() });
   const data = await res.json();
   if (data.whatsapp && data.whatsapp.ok) {
     showToast('Status updated & WhatsApp sent!');
@@ -158,7 +170,7 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
 
   const res = await fetch('api/orders', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -175,8 +187,45 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
   loadOrders();
 });
 
-(async function init() {
+async function startApp() {
+  pinGate.style.display = 'none';
+  appContent.style.display = 'block';
   await loadBranches();
   await loadOrders();
   setInterval(loadOrders, 15000); // auto-refresh so staff see new/updated orders without reloading
+}
+
+async function attemptUnlock(pin) {
+  localStorage.setItem('staffPin', pin);
+  const res = await fetch('api/orders?branch=All', { headers: authHeaders() });
+  if (res.status === 401) {
+    localStorage.removeItem('staffPin');
+    pinError.style.display = 'block';
+    return false;
+  }
+  await startApp();
+  return true;
+}
+
+pinSubmit.addEventListener('click', async () => {
+  const pin = pinInput.value.trim();
+  if (pin.length !== 4) return;
+  pinError.style.display = 'none';
+  pinSubmit.disabled = true;
+  pinSubmit.textContent = 'Checking...';
+  await attemptUnlock(pin);
+  pinSubmit.disabled = false;
+  pinSubmit.textContent = 'Unlock';
+});
+
+pinInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') pinSubmit.click();
+});
+
+(async function init() {
+  const storedPin = getPin();
+  if (storedPin) {
+    await attemptUnlock(storedPin);
+  }
+  // otherwise the gate just sits there waiting for pinSubmit
 })();

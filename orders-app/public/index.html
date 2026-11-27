@@ -105,10 +105,36 @@
     font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none;
   }
   .toast.show { opacity: 1; }
+  .pin-gate {
+    position: fixed; inset: 0; background: var(--gray-bg);
+    display: flex; align-items: center; justify-content: center; z-index: 100;
+    padding: 16px;
+  }
+  .pin-box {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px 22px; max-width: 320px; width: 100%; text-align: center;
+  }
+  .pin-box h2 { margin: 0 0 16px; font-size: 18px; }
+  .pin-box input {
+    width: 100%; font-size: 24px; text-align: center; letter-spacing: 10px;
+    padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px;
+  }
+  #appContent { display: none; }
 </style>
 </head>
 <body>
 
+<div class="pin-gate" id="pinGate">
+  <div class="pin-box">
+    <h2>👓 Staff Access</h2>
+    <label for="pinInput">Enter 4-digit access code</label>
+    <input type="tel" id="pinInput" maxlength="4" inputmode="numeric" placeholder="----" />
+    <button id="pinSubmit" type="button">Unlock</button>
+    <div id="pinError" class="status error" style="display:none; color:#c0392b; margin-top:10px; font-size:13px;">Incorrect code. Try again.</div>
+  </div>
+</div>
+
+<div id="appContent">
 <header>
   <h1>👓 Shivam Opticals - Orders</h1>
   <div class="branch-picker">
@@ -165,6 +191,7 @@
   <div class="section-title">✅ Collected (recent)</div>
   <div id="collectedList" class="card"></div>
 </main>
+</div>
 
 <div class="toast" id="toast"></div>
 
